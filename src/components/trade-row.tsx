@@ -9,21 +9,17 @@ interface TradeRowProps {
 }
 
 export function TradeRow({ trade }: TradeRowProps) {
-  const amount = parseFloat(trade.size) * parseFloat(trade.price);
-  const priceInCents = (parseFloat(trade.price) * 100).toFixed(1);
+  const amount = trade.size * trade.price;
+  const priceInCents = (trade.price * 100).toFixed(1);
   const isBuy = trade.side === "BUY";
   const category = classifyTrade(trade);
-  const traderDisplay = trade.trader
-    ? truncateAddress(trade.trader)
-    : truncateAddress(trade.owner);
+  const traderDisplay = trade.pseudonym || truncateAddress(trade.proxyWallet);
 
-  const eventUrl = trade.event_slug
-    ? `https://polymarket.com/event/${trade.event_slug}`
+  const eventUrl = trade.eventSlug
+    ? `https://polymarket.com/event/${trade.eventSlug}`
     : undefined;
 
-  const profileUrl = trade.trader
-    ? `https://polymarket.com/profile/${trade.trader}`
-    : `https://polymarket.com/profile/${trade.owner}`;
+  const profileUrl = `https://polymarket.com/profile/${trade.proxyWallet}`;
 
   return (
     <div className="flex items-center gap-3 border-b border-zinc-800 px-3 py-2.5 text-sm hover:bg-zinc-900/50">
@@ -43,11 +39,11 @@ export function TradeRow({ trade }: TradeRowProps) {
             rel="noopener noreferrer"
             className="truncate font-medium text-zinc-100 hover:text-indigo-400"
           >
-            {trade.title || trade.market}
+            {trade.title}
           </a>
         ) : (
           <span className="truncate font-medium text-zinc-100">
-            {trade.title || trade.market}
+            {trade.title}
           </span>
         )}
       </div>
@@ -84,7 +80,7 @@ export function TradeRow({ trade }: TradeRowProps) {
       </a>
 
       <span className="w-16 shrink-0 text-right text-zinc-500">
-        {formatTime(trade.match_time)}
+        {formatTime(trade.timestamp)}
       </span>
 
       <span className="shrink-0 rounded-full bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400">

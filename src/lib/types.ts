@@ -1,25 +1,23 @@
 export interface Trade {
-  id: string;
-  taker_order_id: string;
-  market: string;
-  asset_id: string;
+  proxyWallet: string;
   side: "BUY" | "SELL";
-  size: string;
-  fee_rate_bps: string;
-  price: string;
-  status: string;
-  match_time: string;
-  last_update: string;
-  outcome: string;
-  bucket_index: string;
-  owner: string;
-  transaction_hash: string;
-  maker_address: string;
-  trader: string;
-  event_slug: string;
-  market_slug: string;
+  asset: string;
+  conditionId: string;
+  size: number;
+  price: number;
+  timestamp: number;
   title: string;
+  slug: string;
   icon: string;
+  eventSlug: string;
+  outcome: string;
+  outcomeIndex: number;
+  name: string;
+  pseudonym: string;
+  bio: string;
+  profileImage: string;
+  profileImageOptimized: string;
+  transactionHash: string;
 }
 
 export type Category = "sports" | "crypto" | "updown" | "other";

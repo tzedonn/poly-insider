@@ -25,18 +25,15 @@ export function TradeFeed() {
 
       const incoming: Trade[] = await res.json();
       const newTrades = incoming.filter(
-        (t) => !seenHashes.current.has(t.transaction_hash),
+        (t) => !seenHashes.current.has(t.transactionHash),
       );
 
       if (newTrades.length > 0) {
         for (const t of newTrades) {
-          seenHashes.current.add(t.transaction_hash);
+          seenHashes.current.add(t.transactionHash);
         }
 
-        setTrades((prev) => {
-          const merged = [...newTrades, ...prev].slice(0, MAX_TRADES);
-          return merged;
-        });
+        setTrades((prev) => [...newTrades, ...prev].slice(0, MAX_TRADES));
       }
 
       setStatus("ok");
@@ -55,10 +52,8 @@ export function TradeFeed() {
     const category = classifyTrade(trade);
     if (!filters.categories[category]) return false;
 
-    const amount = parseFloat(trade.size) * parseFloat(trade.price);
-    if (amount < filters.minAmount) return false;
-
-    return true;
+    const amount = trade.size * trade.price;
+    return amount >= filters.minAmount;
   });
 
   return (
@@ -105,7 +100,7 @@ export function TradeFeed() {
         )}
 
         {filteredTrades.map((trade) => (
-          <TradeRow key={trade.transaction_hash} trade={trade} />
+          <TradeRow key={trade.transactionHash} trade={trade} />
         ))}
       </div>
     </div>

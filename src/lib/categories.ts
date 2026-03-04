@@ -21,7 +21,7 @@ function slugMatches(slug: string, keywords: string[]): boolean {
 }
 
 export function classifyTrade(trade: Trade): Category {
-  const slug = trade.market_slug || trade.event_slug || "";
+  const slug = trade.slug || trade.eventSlug || "";
 
   if (slugMatches(slug, UPDOWN_KEYWORDS)) return "updown";
   if (slugMatches(slug, SPORTS_KEYWORDS)) return "sports";

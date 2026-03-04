@@ -4,16 +4,14 @@ export function formatUsd(amount: number): string {
   return `$${amount.toFixed(2)}`;
 }
 
-export function formatTime(isoString: string): string {
-  const date = new Date(isoString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
+export function formatTime(unixSeconds: number): string {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const diffSec = nowSec - unixSeconds;
 
   if (diffSec < 60) return `${diffSec}s ago`;
   if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
   if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
-  return date.toLocaleDateString();
+  return new Date(unixSeconds * 1000).toLocaleDateString();
 }
 
 export function truncateAddress(address: string): string {
