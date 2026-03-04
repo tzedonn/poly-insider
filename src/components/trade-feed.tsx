@@ -23,7 +23,8 @@ export function TradeFeed() {
       const res = await fetch("/api/trades");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const incoming: Trade[] = await res.json();
+      const json = await res.json();
+      const incoming: Trade[] = Array.isArray(json) ? json : [];
       const newTrades = incoming.filter(
         (t) => !seenHashes.current.has(t.transactionHash),
       );
