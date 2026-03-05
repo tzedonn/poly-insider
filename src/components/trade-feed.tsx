@@ -22,7 +22,7 @@ export function TradeFeed() {
 
   const fetchTrades = useCallback(async () => {
     try {
-      const res = await fetch("/api/trades");
+      const res = await fetch(`/api/trades?t=${Date.now()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const json = await res.json();
