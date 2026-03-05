@@ -64,6 +64,8 @@ class TelegramNotifier:
         self._bot_base = f"{_TELEGRAM_API}/bot{settings.telegram_bot_token}"
         self._url = f"{self._bot_base}/sendMessage"
         self._paused_until: float | None = None
+        self._start_time: float = time.time()
+        self._last_heartbeat_time: float = time.time()
         self.trades_streamed: int = 0
         self.wallets_streamed: int = 0
         self.wallets_after_exclusions: int = 0
@@ -134,6 +136,21 @@ class TelegramNotifier:
             log.popleft()
         return len(log)
 
+    @staticmethod
+    def _fmt_elapsed(seconds: float) -> str:
+        mins = int(seconds // 60)
+        if mins < 60:
+            return f"{mins}min"
+        hours, mins = divmod(mins, 60)
+        return f"{hours}h {mins}min"
+
+    @staticmethod
+    def _per_hr(count: int, seconds: float) -> str:
+        if seconds < 60:
+            return "—"
+        rate = count / (seconds / 3600)
+        return f"{rate:,.0f}/hr"
+
     async def listen_for_commands(self) -> None:
         url = f"{self._bot_base}/getUpdates"
         offset = 0
@@ -179,11 +196,13 @@ class TelegramNotifier:
                     above_thr = self._count_24h(self._above_threshold_log)
                     alerts = self._count_24h(self._alerts_log)
                     status = "paused" if self.is_paused else "active"
+                    elapsed = min(time.time() - self._start_time, _DAY_SECONDS)
+                    el_str = self._fmt_elapsed(elapsed)
                     await self._reply(
                         chat_id,
-                        f"Last 24h funnel:\n"
-                        f"Trades streamed: {trades}\n"
-                        f"Wallets streamed: {streamed}\n"
+                        f"Last 24h funnel ({el_str}):\n"
+                        f"Trades streamed: {trades} ({self._per_hr(trades, elapsed)})\n"
+                        f"Wallets streamed: {streamed} ({self._per_hr(streamed, elapsed)})\n"
                         f"After exclusions: {after_ex}\n"
                         f"Trades > $100: {above_thr}\n"
                         f"Insider alerts: {alerts}\n"
@@ -193,6 +212,9 @@ class TelegramNotifier:
                     await self._reply_html(chat_id, _HELP_TEXT)
 
     async def send_heartbeat(self) -> None:
+        now = time.time()
+        elapsed = now - self._last_heartbeat_time
+        self._last_heartbeat_time = now
         trades = self.trades_streamed
         streamed = self.wallets_streamed
         after_ex = self.wallets_after_exclusions
@@ -204,11 +226,12 @@ class TelegramNotifier:
         self.wallets_above_threshold = 0
         self.alerts_fired = 0
 
+        el_str = self._fmt_elapsed(elapsed)
         text = (
             f"Insidor bot is alive.\n\n"
-            f"Funnel (since last heartbeat):\n"
-            f"Trades streamed: {trades}\n"
-            f"Wallets streamed: {streamed}\n"
+            f"Funnel (since last heartbeat, {el_str}):\n"
+            f"Trades streamed: {trades} ({self._per_hr(trades, elapsed)})\n"
+            f"Wallets streamed: {streamed} ({self._per_hr(streamed, elapsed)})\n"
             f"After exclusions: {after_ex}\n"
             f"Trades > $100: {above_thr}\n"
             f"Insider alerts: {alerts}\n\n"
