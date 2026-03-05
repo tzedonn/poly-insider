@@ -28,7 +28,7 @@ EXCLUDED_SLUG_KEYWORDS = (
     "hockey", "f1-", "formula-1", "nascar", "cricket", "rugby",
     "premier-league", "champions-league", "world-cup", "super-bowl",
     "stanley-cup", "world-series", "wbc-",
-    "lol-", "lal-", "cs2-", "atp-", "epl-", "cde-",
+    "lol-", "lal-", "cbb-", "cs2-", "atp-", "epl-", "cde-",
     "presidential-nominee", "presidential-election",
     "the-masters", "crint-", "-cl-",
     "highest-temperature", "largest-company",
