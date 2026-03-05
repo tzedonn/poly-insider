@@ -50,24 +50,28 @@ class TradePoller:
             self._seen_set.discard(oldest)
         return False
 
-    def _extract_wallets(self, trades: list[Trade]) -> dict[str, Trade]:
+    def _extract_wallets(
+        self, trades: list[Trade],
+    ) -> tuple[dict[str, Trade], int, int, int]:
+        trades_seen = 0
+        all_wallets: set[str] = set()
+        after_exclusions: set[str] = set()
         wallets: dict[str, Trade] = {}
-        below_threshold: set[str] = set()
         for trade in trades:
             if self._dedup_hash(trade.transactionHash):
                 continue
+            trades_seen += 1
+            all_wallets.add(trade.proxyWallet)
             if any(kw in trade.slug for kw in _EXCLUDED_SLUG_KEYWORDS):
                 continue
+            after_exclusions.add(trade.proxyWallet)
             usdc = trade.usdc_value
             if usdc < settings.min_trade_size_usd:
-                below_threshold.add(trade.proxyWallet)
                 continue
             addr = trade.proxyWallet
             if addr not in wallets or usdc > wallets[addr].usdc_value:
                 wallets[addr] = trade
-        for _ in below_threshold - wallets.keys():
-            self._notifier.record_filtered()
-        return wallets
+        return wallets, len(all_wallets), len(after_exclusions), trades_seen
 
     async def _analyze_wallet(self, address: str, trade: Trade) -> None:
         if self._cache.seen(address):
@@ -87,19 +91,19 @@ class TradePoller:
             return
 
         if analysis is None:
-            self._notifier.record_filtered()
             return
 
         await self._notifier.send_alert(analysis)
 
     async def poll_once(self) -> int:
         try:
-            trades = await self._client.get_recent_trades(limit=100)
+            trades = await self._client.get_recent_trades(limit=200)
         except Exception:
             logger.exception("Failed to fetch trades")
             return 0
 
-        wallets = self._extract_wallets(trades)
+        wallets, streamed, after_exclusions, trades_seen = self._extract_wallets(trades)
+        self._notifier.record_funnel(trades_seen, streamed, after_exclusions, len(wallets))
         if not wallets:
             return 0
 
@@ -112,8 +116,6 @@ class TradePoller:
                 await self._analyze_wallet(addr, trade)
 
         await asyncio.gather(*(bounded(addr, t) for addr, t in wallets.items()))
-        self._notifier.wallets_analyzed += len(wallets)
-        self._notifier.record_analyzed(len(wallets))
         return len(wallets)
 
     async def run(self) -> None:

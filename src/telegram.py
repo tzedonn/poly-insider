@@ -18,7 +18,7 @@ _DAY_SECONDS = 86400
 
 _HELP_TEXT = (
     "<b>Available commands:</b>\n\n"
-    "/check — 24h stats (wallets analyzed, insider alerts)\n"
+    "/check — 24h funnel stats (streamed → filtered → alerts)\n"
     "/pause — Pause alerts for 1 hour\n"
     "/resume — Resume alerts\n"
     "/help — Show this message"
@@ -64,11 +64,15 @@ class TelegramNotifier:
         self._bot_base = f"{_TELEGRAM_API}/bot{settings.telegram_bot_token}"
         self._url = f"{self._bot_base}/sendMessage"
         self._paused_until: float | None = None
-        self.wallets_analyzed: int = 0
-        self.wallets_filtered: int = 0
+        self.trades_streamed: int = 0
+        self.wallets_streamed: int = 0
+        self.wallets_after_exclusions: int = 0
+        self.wallets_above_threshold: int = 0
         self.alerts_fired: int = 0
-        self._analyzed_log: deque[float] = deque()
-        self._filtered_log: deque[float] = deque()
+        self._trades_streamed_log: deque[float] = deque()
+        self._streamed_log: deque[float] = deque()
+        self._after_exclusions_log: deque[float] = deque()
+        self._above_threshold_log: deque[float] = deque()
         self._alerts_log: deque[float] = deque()
 
     @property
@@ -106,14 +110,23 @@ class TelegramNotifier:
             logger.error("Failed to send Telegram alert: %s", exc)
             return False
 
-    def record_analyzed(self, count: int) -> None:
+    def record_funnel(
+        self, trades_streamed: int, streamed: int, after_exclusions: int,
+        above_threshold: int,
+    ) -> None:
         now = time.time()
-        for _ in range(count):
-            self._analyzed_log.append(now)
-
-    def record_filtered(self) -> None:
-        self.wallets_filtered += 1
-        self._filtered_log.append(time.time())
+        self.trades_streamed += trades_streamed
+        self.wallets_streamed += streamed
+        self.wallets_after_exclusions += after_exclusions
+        self.wallets_above_threshold += above_threshold
+        for _ in range(trades_streamed):
+            self._trades_streamed_log.append(now)
+        for _ in range(streamed):
+            self._streamed_log.append(now)
+        for _ in range(after_exclusions):
+            self._after_exclusions_log.append(now)
+        for _ in range(above_threshold):
+            self._above_threshold_log.append(now)
 
     def _count_24h(self, log: deque[float]) -> int:
         cutoff = time.time() - _DAY_SECONDS
@@ -160,15 +173,19 @@ class TelegramNotifier:
                     self._paused_until = None
                     await self._reply(chat_id, "Alerts resumed.")
                 elif text == "/check":
-                    analyzed = self._count_24h(self._analyzed_log)
-                    filtered = self._count_24h(self._filtered_log)
+                    trades = self._count_24h(self._trades_streamed_log)
+                    streamed = self._count_24h(self._streamed_log)
+                    after_ex = self._count_24h(self._after_exclusions_log)
+                    above_thr = self._count_24h(self._above_threshold_log)
                     alerts = self._count_24h(self._alerts_log)
                     status = "paused" if self.is_paused else "active"
                     await self._reply(
                         chat_id,
-                        f"Last 24h:\n"
-                        f"Wallets analyzed: {analyzed}\n"
-                        f"Wallets filtered: {filtered}\n"
+                        f"Last 24h funnel:\n"
+                        f"Trades streamed: {trades}\n"
+                        f"Wallets streamed: {streamed}\n"
+                        f"After exclusions: {after_ex}\n"
+                        f"Trades > $100: {above_thr}\n"
                         f"Insider alerts: {alerts}\n"
                         f"Status: {status}",
                     )
@@ -176,17 +193,24 @@ class TelegramNotifier:
                     await self._reply_html(chat_id, _HELP_TEXT)
 
     async def send_heartbeat(self) -> None:
-        analyzed = self.wallets_analyzed
-        filtered = self.wallets_filtered
+        trades = self.trades_streamed
+        streamed = self.wallets_streamed
+        after_ex = self.wallets_after_exclusions
+        above_thr = self.wallets_above_threshold
         alerts = self.alerts_fired
-        self.wallets_analyzed = 0
-        self.wallets_filtered = 0
+        self.trades_streamed = 0
+        self.wallets_streamed = 0
+        self.wallets_after_exclusions = 0
+        self.wallets_above_threshold = 0
         self.alerts_fired = 0
 
         text = (
-            f"Insidor bot is alive.\n"
-            f"Wallets analyzed: {analyzed}\n"
-            f"Wallets filtered: {filtered}\n"
+            f"Insidor bot is alive.\n\n"
+            f"Funnel (since last heartbeat):\n"
+            f"Trades streamed: {trades}\n"
+            f"Wallets streamed: {streamed}\n"
+            f"After exclusions: {after_ex}\n"
+            f"Trades > $100: {above_thr}\n"
             f"Insider alerts: {alerts}\n\n"
             f"Active filters:\n"
             f"• Min trade size: ${settings.min_trade_size_usd:,.0f}\n"

@@ -6,7 +6,7 @@ class Settings(BaseSettings):
 
     telegram_bot_token: str
     telegram_chat_id: str
-    poll_interval_seconds: int = 30
+    poll_interval_seconds: int = 15
     min_trade_size_usd: float = 100
     cache_ttl_hours: int = 24
 
