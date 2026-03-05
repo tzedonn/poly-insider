@@ -7,7 +7,7 @@ from collections import deque
 
 import httpx
 
-from src.config import EXCLUDED_SLUG_KEYWORDS, settings
+from src.config import settings
 from src.models import Trade, WalletAnalysis
 
 logger = logging.getLogger(__name__)
@@ -232,8 +232,7 @@ class TelegramNotifier:
                         f"After exclusions: {after_ex} ({self._per_min(after_ex, elapsed)})\n"
                         f"Trades > $1,000: {above_thr} ({self._per_hr(above_thr, elapsed)})\n"
                         f"Insider alerts: {alerts}\n"
-                        f"Status: {status}\n\n"
-                        f"Excluded slugs:\n{', '.join(EXCLUDED_SLUG_KEYWORDS)}",
+                        f"Status: {status}",
                     )
                 elif text == "/help":
                     await self._reply_html(chat_id, _HELP_TEXT)
