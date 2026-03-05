@@ -3,7 +3,7 @@
 import { CATEGORY_LABELS } from "@/lib/categories";
 import type { Category, Filters } from "@/lib/types";
 
-const CATEGORIES: Category[] = ["sports", "crypto", "updown", "other"];
+const CATEGORIES: Category[] = ["sports", "crypto", "updown", "elon", "other"];
 const AMOUNT_PRESETS = [0, 100, 1_000, 10_000, 100_000];
 
 function formatPreset(n: number): string {

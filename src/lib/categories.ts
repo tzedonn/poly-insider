@@ -2,6 +2,8 @@ import type { Category, Trade } from "./types";
 
 const UPDOWN_KEYWORDS = ["updown", "up-down", "up-or-down"];
 
+const ELON_KEYWORDS = ["elon-musk", "elon-tweet", "musk-tweet"];
+
 const SPORTS_KEYWORDS = [
   "nfl", "nba", "mlb", "nhl", "ufc", "mma", "boxing", "tennis", "golf",
   "pga", "soccer", "football", "basketball", "baseball", "hockey",
@@ -24,6 +26,7 @@ export function classifyTrade(trade: Trade): Category {
   const slug = trade.slug || trade.eventSlug || "";
 
   if (slugMatches(slug, UPDOWN_KEYWORDS)) return "updown";
+  if (slugMatches(slug, ELON_KEYWORDS)) return "elon";
   if (slugMatches(slug, SPORTS_KEYWORDS)) return "sports";
   if (slugMatches(slug, CRYPTO_KEYWORDS)) return "crypto";
   return "other";
@@ -33,12 +36,14 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   sports: "Sports",
   crypto: "Crypto",
   updown: "Up/Down",
+  elon: "Elon Tweets",
   other: "Other",
 };
 
 export const DEFAULT_FILTERS: Record<Category, boolean> = {
-  sports: false,
-  crypto: false,
+  sports: true,
+  crypto: true,
   updown: false,
+  elon: false,
   other: true,
 };

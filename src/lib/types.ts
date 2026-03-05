@@ -20,7 +20,7 @@ export interface Trade {
   transactionHash: string;
 }
 
-export type Category = "sports" | "crypto" | "updown" | "other";
+export type Category = "sports" | "crypto" | "updown" | "elon" | "other";
 
 export interface Filters {
   categories: Record<Category, boolean>;
