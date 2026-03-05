@@ -20,3 +20,18 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+EXCLUDED_SLUG_KEYWORDS = (
+    "bitcoin", "btc-", "ethereum", "eth-", "solana", "sol-", "xrp",
+    "nfl", "nba", "mlb", "nhl", "ufc", "mma", "boxing", "tennis",
+    "golf", "pga", "soccer", "football", "basketball", "baseball",
+    "hockey", "f1-", "formula-1", "nascar", "cricket", "rugby",
+    "premier-league", "champions-league", "world-cup", "super-bowl",
+    "stanley-cup", "world-series", "wbc-",
+    "lol-", "cs2-", "atp-", "epl-", "cde-",
+    "presidential-nominee", "presidential-election",
+    "the-masters", "crint-", "-cl-",
+    "highest-temperature", "largest-company",
+    "elon-musk-of-tweets",
+    "fed-decision", "next-three-fed-decisions", "fed-rate-cut",
+)

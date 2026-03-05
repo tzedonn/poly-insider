@@ -7,7 +7,7 @@ from collections import deque
 from src.analyzer import WalletAnalyzer
 from src.api_client import PolymarketClient
 from src.cache import WalletCache
-from src.config import settings
+from src.config import EXCLUDED_SLUG_KEYWORDS, settings
 from src.models import Trade
 from src.telegram import TelegramNotifier
 
@@ -15,20 +15,6 @@ logger = logging.getLogger(__name__)
 
 _MAX_SEEN_HASHES = 10_000
 _MAX_CONCURRENT_WALLETS = 5
-_EXCLUDED_SLUG_KEYWORDS = (
-    "bitcoin", "btc-", "ethereum", "eth-", "solana", "sol-", "xrp",
-    "nfl", "nba", "mlb", "nhl", "ufc", "mma", "boxing", "tennis",
-    "golf", "pga", "soccer", "football", "basketball", "baseball",
-    "hockey", "f1-", "formula-1", "nascar", "cricket", "rugby",
-    "premier-league", "champions-league", "world-cup", "super-bowl",
-    "stanley-cup", "world-series", "wbc-",
-    "lol-", "cs2-", "atp-", "epl-", "cde-",
-    "presidential-nominee", "presidential-election",
-    "the-masters", "crint-", "-cl-",
-    "highest-temperature", "largest-company",
-    "elon-musk-of-tweets",
-    "fed-decision", "next-three-fed-decisions", "fed-rate-cut",
-)
 
 
 class TradePoller:
@@ -68,7 +54,7 @@ class TradePoller:
                 continue
             trades_seen += 1
             all_wallets.add(trade.proxyWallet)
-            if any(kw in trade.slug or kw in trade.eventSlug for kw in _EXCLUDED_SLUG_KEYWORDS):
+            if any(kw in trade.slug or kw in trade.eventSlug for kw in EXCLUDED_SLUG_KEYWORDS):
                 continue
             after_exclusions.add(trade.proxyWallet)
             usdc = trade.usdc_value
