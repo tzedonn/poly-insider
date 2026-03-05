@@ -7,7 +7,6 @@ import { FilterBar } from "./filter-bar";
 import { TradeRow } from "./trade-row";
 
 const POLL_INTERVAL = 5_000;
-const MAX_TRADES = 500;
 
 export function TradeFeed() {
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -34,7 +33,7 @@ export function TradeFeed() {
           seenHashes.current.add(t.transactionHash);
         }
 
-        setTrades((prev) => [...newTrades, ...prev].slice(0, MAX_TRADES));
+        setTrades((prev) => [...newTrades, ...prev]);
       }
 
       setStatus("ok");
