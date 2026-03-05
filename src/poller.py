@@ -86,6 +86,7 @@ class TradePoller:
                 name=trade.name,
                 bio=trade.bio,
                 profile_image=trade.profileImage,
+                trigger_trade=trade,
             )
         except Exception:
             logger.exception("Analysis failed for %s", address)

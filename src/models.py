@@ -54,3 +54,4 @@ class WalletAnalysis(BaseModel):
     profile_name: str = ""
     profile_bio: str = ""
     profile_image: str = ""
+    trigger_trade: Trade | None = None

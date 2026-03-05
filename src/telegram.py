@@ -8,7 +8,7 @@ from collections import deque
 import httpx
 
 from src.config import settings
-from src.models import WalletAnalysis
+from src.models import Trade, WalletAnalysis
 
 logger = logging.getLogger(__name__)
 
@@ -36,23 +36,42 @@ def _format_alert(analysis: WalletAnalysis) -> str:
         age_days = (time.time() - analysis.first_seen) / 86400
         age_line = f"{age_days:.1f} days old"
 
+    trigger_block = ""
+    if analysis.trigger_trade is not None:
+        t = analysis.trigger_trade
+        direction = f"{t.outcome} at ${t.price:.2f}"
+        trigger_block = (
+            f"\n<b>Triggering Trade:</b>\n"
+            f'  Market: "{t.title}"\n'
+            f"  Direction: {direction}\n"
+            f"  Size: ${t.usdc_value:,.0f}\n"
+            f"  https://polymarket.com/event/{t.eventSlug}"
+        )
+
     position_block = ""
     if analysis.positions:
         top = max(analysis.positions, key=lambda p: p.initialValue)
-        direction = f"{top.outcome} at ${top.curPrice:.2f}"
-        position_block = (
-            f"\n<b>Top Position:</b>\n"
-            f'  Market: "{top.title}"\n'
-            f"  Direction: {direction}\n"
-            f"  Size: ${top.initialValue:,.0f}\n"
-            f"  https://polymarket.com/event/{top.eventSlug}"
+        is_same_market = (
+            analysis.trigger_trade is not None
+            and top.eventSlug == analysis.trigger_trade.eventSlug
+            and top.outcome == analysis.trigger_trade.outcome
         )
+        if not is_same_market:
+            direction = f"{top.outcome} at ${top.curPrice:.2f}"
+            position_block = (
+                f"\n<b>Top Position:</b>\n"
+                f'  Market: "{top.title}"\n'
+                f"  Direction: {direction}\n"
+                f"  Size: ${top.initialValue:,.0f}\n"
+                f"  https://polymarket.com/event/{top.eventSlug}"
+            )
 
     return (
         f"<b>INSIDER ALERT</b>\n\n"
         f"Wallet: <code>{short_addr}</code>\n"
         f"Profile: {profile_line}\n"
         f"Wallet age: {age_line}"
+        f"{trigger_block}"
         f"{position_block}\n\n"
         f"https://polymarket.com/profile/{addr}"
     )

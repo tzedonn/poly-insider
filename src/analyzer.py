@@ -4,7 +4,7 @@ import asyncio
 import logging
 
 from src.api_client import PolymarketClient
-from src.models import Position, WalletAnalysis
+from src.models import Position, Trade, WalletAnalysis
 from src.signals import is_fresh_wallet
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ class WalletAnalyzer:
         name: str = "",
         bio: str = "",
         profile_image: str = "",
+        trigger_trade: Trade | None = None,
     ) -> WalletAnalysis | None:
         market_count = 0
         try:
@@ -64,4 +65,5 @@ class WalletAnalyzer:
             profile_name=name,
             profile_bio=bio,
             profile_image=profile_image,
+            trigger_trade=trigger_trade,
         )
