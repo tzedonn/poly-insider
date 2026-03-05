@@ -206,7 +206,10 @@ class TelegramNotifier:
                         f"After exclusions: {after_ex}\n"
                         f"Trades > $1,000: {above_thr}\n"
                         f"Insider alerts: {alerts}\n"
-                        f"Status: {status}",
+                        f"Status: {status}\n\n"
+                        f"Excluded categories:\n"
+                        f"• Crypto (BTC, ETH, SOL, XRP)\n"
+                        f"• Sports (NFL, NBA, MLB, NHL, UFC, MMA, boxing, tennis, golf, soccer, F1, NASCAR, cricket, rugby)",
                     )
                 elif text == "/help":
                     await self._reply_html(chat_id, _HELP_TEXT)
