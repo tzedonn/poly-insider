@@ -63,7 +63,7 @@ class TradePoller:
                 continue
             trades_seen += 1
             all_wallets.add(trade.proxyWallet)
-            if any(kw in trade.slug for kw in _EXCLUDED_SLUG_KEYWORDS):
+            if any(kw in trade.slug or kw in trade.eventSlug for kw in _EXCLUDED_SLUG_KEYWORDS):
                 continue
             after_exclusions.add(trade.proxyWallet)
             usdc = trade.usdc_value
