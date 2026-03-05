@@ -23,6 +23,7 @@ _EXCLUDED_SLUG_KEYWORDS = (
     "premier-league", "champions-league", "world-cup", "super-bowl",
     "stanley-cup", "world-series", "wbc-",
     "presidential-nominee", "the-masters", "crint-",
+    "elon-musk-of-tweets",
 )
 
 
