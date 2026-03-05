@@ -53,7 +53,7 @@ class WalletAnalyzer:
             logger.warning("Failed to fetch first trade for %s: %s", address, results[1])
 
         if not is_fresh_wallet(first_seen):
-            logger.info("Skipping %s — wallet older than 7 days", address[:10])
+            logger.info("Skipping %s — wallet older than 30 days", address[:10])
             return None
 
         return WalletAnalysis(

@@ -4,7 +4,7 @@ import time
 
 
 _DAY = 86400
-_MAX_AGE_DAYS = 7
+_MAX_AGE_DAYS = 30
 
 
 def is_fresh_wallet(first_seen_ts: int | None) -> bool:

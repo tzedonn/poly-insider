@@ -187,7 +187,11 @@ class TelegramNotifier:
             f"Insidor bot is alive.\n"
             f"Wallets analyzed: {analyzed}\n"
             f"Wallets filtered: {filtered}\n"
-            f"Insider alerts: {alerts}"
+            f"Insider alerts: {alerts}\n\n"
+            f"Active filters:\n"
+            f"• Min trade size: ${settings.min_trade_size_usd:,.0f}\n"
+            f"• Max markets traded: 10\n"
+            f"• Max wallet age: 30 days"
         )
         payload = {
             "chat_id": settings.telegram_chat_id,

@@ -52,6 +52,7 @@ class TradePoller:
 
     def _extract_wallets(self, trades: list[Trade]) -> dict[str, Trade]:
         wallets: dict[str, Trade] = {}
+        below_threshold: set[str] = set()
         for trade in trades:
             if self._dedup_hash(trade.transactionHash):
                 continue
@@ -59,10 +60,13 @@ class TradePoller:
                 continue
             usdc = trade.usdc_value
             if usdc < settings.min_trade_size_usd:
+                below_threshold.add(trade.proxyWallet)
                 continue
             addr = trade.proxyWallet
             if addr not in wallets or usdc > wallets[addr].usdc_value:
                 wallets[addr] = trade
+        for _ in below_threshold - wallets.keys():
+            self._notifier.record_filtered()
         return wallets
 
     async def _analyze_wallet(self, address: str, trade: Trade) -> None:
