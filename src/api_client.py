@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from typing import Any
 
 import httpx
@@ -47,7 +48,10 @@ class PolymarketClient:
         raise last_exc  # type: ignore[misc]
 
     async def get_recent_trades(self, limit: int = 100) -> list[Trade]:
-        data = await self._get(self._data, "/trades", params={"limit": limit})
+        data = await self._get(
+            self._data, "/trades",
+            params={"limit": limit, "_": int(time.time() * 1000)},
+        )
         return [Trade.model_validate(t) for t in data]
 
     async def get_positions(self, address: str) -> list[Position]:
