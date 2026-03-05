@@ -7,6 +7,7 @@ import { FilterBar } from "./filter-bar";
 import { TradeRow } from "./trade-row";
 
 const POLL_INTERVAL = 5_000;
+const TICK_INTERVAL = 1_000;
 
 export function TradeFeed() {
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -15,6 +16,8 @@ export function TradeFeed() {
     minAmount: 0,
   });
   const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
+  const [tick, setTick] = useState(0);
+  const [lastPoll, setLastPoll] = useState<number | null>(null);
   const seenHashes = useRef(new Set<string>());
 
   const fetchTrades = useCallback(async () => {
@@ -36,6 +39,7 @@ export function TradeFeed() {
         setTrades((prev) => [...newTrades, ...prev]);
       }
 
+      setLastPoll(Math.floor(Date.now() / 1000));
       setStatus("ok");
     } catch {
       setStatus("error");
@@ -44,9 +48,16 @@ export function TradeFeed() {
 
   useEffect(() => {
     fetchTrades();
-    const id = setInterval(fetchTrades, POLL_INTERVAL);
-    return () => clearInterval(id);
+    const pollId = setInterval(fetchTrades, POLL_INTERVAL);
+    const tickId = setInterval(() => setTick((t) => t + 1), TICK_INTERVAL);
+    return () => {
+      clearInterval(pollId);
+      clearInterval(tickId);
+    };
   }, [fetchTrades]);
+
+  // tick forces re-render so formatTime updates; suppress lint warning
+  void tick;
 
   const filteredTrades = trades.filter((trade) => {
     const category = classifyTrade(trade);
@@ -55,6 +66,8 @@ export function TradeFeed() {
     const amount = trade.size * trade.price;
     return amount >= filters.minAmount;
   });
+
+  const pollAgo = lastPoll ? Math.floor(Date.now() / 1000) - lastPoll : null;
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-4 p-4">
@@ -69,6 +82,7 @@ export function TradeFeed() {
           {status === "ok" && (
             <span className="text-xs text-zinc-500">
               {filteredTrades.length} trades
+              {pollAgo !== null && ` · polled ${pollAgo}s ago`}
             </span>
           )}
           {status === "error" && (
