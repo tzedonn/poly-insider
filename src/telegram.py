@@ -204,7 +204,7 @@ class TelegramNotifier:
                         f"Trades streamed: {trades} ({self._per_hr(trades, elapsed)})\n"
                         f"Wallets streamed: {streamed} ({self._per_hr(streamed, elapsed)})\n"
                         f"After exclusions: {after_ex}\n"
-                        f"Trades > $100: {above_thr}\n"
+                        f"Trades > $1,000: {above_thr}\n"
                         f"Insider alerts: {alerts}\n"
                         f"Status: {status}",
                     )
@@ -233,7 +233,7 @@ class TelegramNotifier:
             f"Trades streamed: {trades} ({self._per_hr(trades, elapsed)})\n"
             f"Wallets streamed: {streamed} ({self._per_hr(streamed, elapsed)})\n"
             f"After exclusions: {after_ex}\n"
-            f"Trades > $100: {above_thr}\n"
+            f"Trades > $1,000: {above_thr}\n"
             f"Insider alerts: {alerts}\n\n"
             f"Active filters:\n"
             f"• Min trade size: ${settings.min_trade_size_usd:,.0f}\n"
