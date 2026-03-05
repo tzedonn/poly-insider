@@ -24,6 +24,7 @@ _EXCLUDED_SLUG_KEYWORDS = (
     "stanley-cup", "world-series", "wbc-",
     "lol-", "presidential-nominee", "the-masters", "crint-",
     "elon-musk-of-tweets",
+    "fed-decision", "next-three-fed-decisions", "fed-rate-cut",
 )
 
 
