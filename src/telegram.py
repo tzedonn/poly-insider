@@ -209,7 +209,8 @@ class TelegramNotifier:
                         f"Status: {status}\n\n"
                         f"Excluded categories:\n"
                         f"• Crypto (BTC, ETH, SOL, XRP)\n"
-                        f"• Sports (NFL, NBA, MLB, NHL, UFC, MMA, boxing, tennis, golf, soccer, F1, NASCAR, cricket, rugby)",
+                        f"• Sports (NFL, NBA, MLB, NHL, UFC, MMA, boxing, tennis, golf, soccer, F1, NASCAR, cricket, rugby, the-masters, crint-)\n"
+                        f"• Politics (presidential-nominee)",
                     )
                 elif text == "/help":
                     await self._reply_html(chat_id, _HELP_TEXT)

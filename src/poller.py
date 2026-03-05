@@ -22,6 +22,7 @@ _EXCLUDED_SLUG_KEYWORDS = (
     "hockey", "f1-", "formula-1", "nascar", "cricket", "rugby",
     "premier-league", "champions-league", "world-cup", "super-bowl",
     "stanley-cup", "world-series",
+    "presidential-nominee", "the-masters", "crint-",
 )
 
 
