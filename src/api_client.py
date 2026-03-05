@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from typing import Any
@@ -43,16 +44,33 @@ class PolymarketClient:
                 last_exc = exc
                 logger.warning("API %s attempt %d failed: %s", path, attempt + 1, exc)
                 if attempt < _RETRY_ATTEMPTS - 1:
-                    import asyncio
                     await asyncio.sleep(backoff)
         raise last_exc  # type: ignore[misc]
 
-    async def get_recent_trades(self, limit: int = 100) -> list[Trade]:
-        data = await self._get(
-            self._data, "/trades",
-            params={"limit": limit, "_": int(time.time() * 1000)},
-        )
-        return [Trade.model_validate(t) for t in data]
+    async def get_recent_trades(self, limit: int = 1000, pages: int = 3) -> list[Trade]:
+        cb = int(time.time() * 1000)
+        coros = [
+            self._get(
+                self._data, "/trades",
+                params={"limit": limit, "offset": i * limit, "_": cb},
+            )
+            for i in range(pages)
+        ]
+        results = await asyncio.gather(*coros, return_exceptions=True)
+        seen: set[str] = set()
+        trades: list[Trade] = []
+        for data in results:
+            if isinstance(data, Exception):
+                logger.warning("Trade page fetch failed: %s", data)
+                continue
+            if not isinstance(data, list):
+                continue
+            for raw in data:
+                tx = raw.get("transactionHash")
+                if tx and tx not in seen:
+                    seen.add(tx)
+                    trades.append(Trade.model_validate(raw))
+        return trades
 
     async def get_positions(self, address: str) -> list[Position]:
         data = await self._get(self._data, "/positions", params={"user": address})

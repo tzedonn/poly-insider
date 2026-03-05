@@ -97,7 +97,7 @@ class TradePoller:
 
     async def poll_once(self) -> int:
         try:
-            trades = await self._client.get_recent_trades(limit=1000)
+            trades = await self._client.get_recent_trades()
         except Exception:
             logger.exception("Failed to fetch trades")
             return 0
