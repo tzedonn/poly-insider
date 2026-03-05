@@ -56,7 +56,6 @@ export function TradeFeed() {
     };
   }, [fetchTrades]);
 
-  // tick forces re-render so formatTime updates; suppress lint warning
   void tick;
 
   const filteredTrades = trades.filter((trade) => {
@@ -70,11 +69,9 @@ export function TradeFeed() {
   const pollAgo = lastPoll ? Math.floor(Date.now() / 1000) - lastPoll : null;
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 p-4">
+    <div className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-zinc-100">
-          Polymarket Live Feed
-        </h1>
+        <h1 className="text-lg font-semibold text-zinc-100">Activity</h1>
         <div className="flex items-center gap-2">
           {status === "loading" && (
             <span className="text-xs text-zinc-500">Loading...</span>
@@ -82,7 +79,7 @@ export function TradeFeed() {
           {status === "ok" && (
             <span className="text-xs text-zinc-500">
               {filteredTrades.length} trades
-              {pollAgo !== null && ` · polled ${pollAgo}s ago`}
+              {pollAgo !== null && ` · ${pollAgo}s ago`}
             </span>
           )}
           {status === "error" && (
@@ -95,20 +92,8 @@ export function TradeFeed() {
       <FilterBar filters={filters} onFiltersChange={setFilters} />
 
       <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
-        <div className="flex items-center gap-3 border-b border-zinc-800 bg-zinc-900/50 px-3 py-2 text-xs font-medium text-zinc-500">
-          <div className="h-8 w-8 shrink-0" />
-          <div className="min-w-0 flex-1">Market</div>
-          <div className="w-10 shrink-0 text-center">Side</div>
-          <div className="w-16 shrink-0 text-right">Outcome</div>
-          <div className="w-20 shrink-0 text-right">Amount</div>
-          <div className="w-14 shrink-0 text-right">Price</div>
-          <div className="w-24 shrink-0 text-right">Trader</div>
-          <div className="w-16 shrink-0 text-right">Time</div>
-          <div className="w-16 shrink-0 text-center">Cat.</div>
-        </div>
-
         {filteredTrades.length === 0 && status !== "loading" && (
-          <div className="py-12 text-center text-zinc-500">
+          <div className="py-12 text-center text-sm text-zinc-500">
             No trades match your filters.
           </div>
         )}

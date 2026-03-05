@@ -1,7 +1,6 @@
 "use client";
 
-import { classifyTrade, CATEGORY_LABELS } from "@/lib/categories";
-import { formatUsd, formatTime, truncateAddress } from "@/lib/format";
+import { formatUsd, formatTime } from "@/lib/format";
 import type { Trade } from "@/lib/types";
 
 interface TradeRowProps {
@@ -12,23 +11,26 @@ export function TradeRow({ trade }: TradeRowProps) {
   const amount = trade.size * trade.price;
   const priceInCents = (trade.price * 100).toFixed(1);
   const isBuy = trade.side === "BUY";
-  const category = classifyTrade(trade);
-  const traderDisplay = trade.pseudonym || truncateAddress(trade.proxyWallet);
+  const traderDisplay = trade.pseudonym || trade.proxyWallet.slice(0, 6) + "..." + trade.proxyWallet.slice(-4);
 
   const eventUrl = trade.eventSlug
     ? `https://polymarket.com/event/${trade.eventSlug}`
     : undefined;
 
-  const profileUrl = `https://polymarket.com/profile/${trade.proxyWallet}`;
+  const polygonscanUrl = trade.transactionHash
+    ? `https://polygonscan.com/tx/${trade.transactionHash}`
+    : undefined;
 
   return (
-    <div className="flex items-center gap-3 border-b border-zinc-800 px-3 py-2.5 text-sm hover:bg-zinc-900/50">
-      {trade.icon && (
+    <div className="flex items-start gap-3 border-b border-zinc-800/60 px-4 py-3 hover:bg-zinc-900/40 transition-colors">
+      {trade.icon ? (
         <img
           src={trade.icon}
           alt=""
-          className="h-8 w-8 shrink-0 rounded-full bg-zinc-800"
+          className="h-12 w-12 shrink-0 rounded-lg bg-zinc-800 object-cover"
         />
+      ) : (
+        <div className="h-12 w-12 shrink-0 rounded-lg bg-zinc-800" />
       )}
 
       <div className="min-w-0 flex-1">
@@ -37,55 +39,48 @@ export function TradeRow({ trade }: TradeRowProps) {
             href={eventUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="truncate font-medium text-zinc-100 hover:text-indigo-400"
+            className="block truncate text-sm font-medium text-zinc-100 hover:text-blue-400 transition-colors"
           >
             {trade.title}
           </a>
         ) : (
-          <span className="truncate font-medium text-zinc-100">
+          <span className="block truncate text-sm font-medium text-zinc-100">
             {trade.title}
           </span>
         )}
+
+        <p className="mt-0.5 text-sm text-zinc-400">
+          <span className="text-zinc-300">{traderDisplay}</span>
+          {" "}
+          <span className={isBuy ? "text-emerald-400" : "text-red-400"}>
+            {isBuy ? "bought" : "sold"}
+          </span>
+          {" "}
+          <span className="text-zinc-300">{trade.outcome}</span>
+          {" "}at {priceInCents}¢
+          {" "}
+          <span className="text-zinc-300">({formatUsd(amount)})</span>
+        </p>
       </div>
 
-      <span
-        className={`shrink-0 rounded px-1.5 py-0.5 text-xs font-bold ${
-          isBuy
-            ? "bg-emerald-500/20 text-emerald-400"
-            : "bg-red-500/20 text-red-400"
-        }`}
-      >
-        {trade.side}
-      </span>
-
-      <span className="w-16 shrink-0 text-right text-zinc-300">
-        {trade.outcome}
-      </span>
-
-      <span className="w-20 shrink-0 text-right font-mono text-zinc-100">
-        {formatUsd(amount)}
-      </span>
-
-      <span className="w-14 shrink-0 text-right font-mono text-zinc-400">
-        {priceInCents}¢
-      </span>
-
-      <a
-        href={profileUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-24 shrink-0 truncate text-right text-zinc-500 hover:text-indigo-400"
-      >
-        {traderDisplay}
-      </a>
-
-      <span className="w-16 shrink-0 text-right text-zinc-500">
-        {formatTime(trade.timestamp)}
-      </span>
-
-      <span className="shrink-0 rounded-full bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400">
-        {CATEGORY_LABELS[category]}
-      </span>
+      <div className="flex shrink-0 items-center gap-2 pt-0.5">
+        <span className="text-xs text-zinc-500 whitespace-nowrap">
+          {formatTime(trade.timestamp)}
+        </span>
+        {polygonscanUrl && (
+          <a
+            href={polygonscanUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-600 hover:text-zinc-400 transition-colors"
+            title="View on Polygonscan"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M6 3H3v10h10v-3M9 3h4v4M14 2L7 9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </a>
+        )}
+      </div>
     </div>
   );
 }
