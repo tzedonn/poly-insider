@@ -164,6 +164,13 @@ class TelegramNotifier:
         return f"{hours}h {mins}min"
 
     @staticmethod
+    def _per_min(count: int, seconds: float) -> str:
+        if seconds < 60:
+            return "—"
+        rate = count / (seconds / 60)
+        return f"{rate:,.1f}/min"
+
+    @staticmethod
     def _per_hr(count: int, seconds: float) -> str:
         if seconds < 60:
             return "—"
@@ -220,10 +227,10 @@ class TelegramNotifier:
                     await self._reply(
                         chat_id,
                         f"Last 24h funnel ({el_str}):\n"
-                        f"Trades streamed: {trades} ({self._per_hr(trades, elapsed)})\n"
-                        f"Wallets streamed: {streamed} ({self._per_hr(streamed, elapsed)})\n"
-                        f"After exclusions: {after_ex}\n"
-                        f"Trades > $1,000: {above_thr}\n"
+                        f"Trades streamed: {trades} ({self._per_min(trades, elapsed)})\n"
+                        f"Wallets streamed: {streamed} ({self._per_min(streamed, elapsed)})\n"
+                        f"After exclusions: {after_ex} ({self._per_min(after_ex, elapsed)})\n"
+                        f"Trades > $1,000: {above_thr} ({self._per_hr(above_thr, elapsed)})\n"
                         f"Insider alerts: {alerts}\n"
                         f"Status: {status}\n\n"
                         f"Excluded categories:\n"
