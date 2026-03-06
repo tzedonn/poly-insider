@@ -76,7 +76,7 @@ def _format_alert(analysis: WalletAnalysis) -> str:
             )
 
     return (
-        f"<b>INSIDER ALERT</b>\n\n"
+        f"🕵️ <b>INSIDER ALERT</b>\n\n"
         f"Wallet: <code>{short_addr}</code>\n"
         f"Profile: {profile_line}\n"
         f"Wallet age: {age_line}"
