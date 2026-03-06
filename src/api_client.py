@@ -93,3 +93,97 @@ class PolymarketClient:
 
     async def get_event(self, event_slug: str) -> dict[str, Any]:
         return await self._get(self._gamma, f"/events/{event_slug}")
+
+
+_NATIVE_USDC = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
+_BRIDGED_USDC_E = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+_USDC_CONTRACTS = {_NATIVE_USDC.lower(), _BRIDGED_USDC_E.lower()}
+_ETHERSCAN_V2 = "https://api.etherscan.io/v2/api"
+_RELAY_API = "https://api.relay.link"
+
+CHAIN_NAMES: dict[int, str] = {
+    1: "Ethereum", 8453: "Base", 42161: "Arbitrum",
+    10: "Optimism", 137: "Polygon", 43114: "Avalanche",
+}
+
+
+class ChainClient:
+    def __init__(self) -> None:
+        self._http = httpx.AsyncClient(timeout=15.0)
+
+    async def close(self) -> None:
+        await self._http.aclose()
+
+    async def _etherscan_token_balance(self, contract: str, address: str) -> int:
+        if not settings.etherscan_api_key:
+            return 0
+        params = {
+            "chainid": 137, "module": "account", "action": "tokenbalance",
+            "contractaddress": contract, "address": address, "tag": "latest",
+            "apikey": settings.etherscan_api_key,
+        }
+        resp = await self._http.get(_ETHERSCAN_V2, params=params)
+        resp.raise_for_status()
+        data = resp.json()
+        if data.get("status") == "1":
+            return int(data.get("result", "0"))
+        return 0
+
+    async def get_usdc_balance(self, address: str) -> float:
+        native, bridged = await asyncio.gather(
+            self._etherscan_token_balance(_NATIVE_USDC, address),
+            self._etherscan_token_balance(_BRIDGED_USDC_E, address),
+            return_exceptions=True,
+        )
+        total = 0
+        if isinstance(native, int):
+            total += native
+        else:
+            logger.warning("Failed to fetch native USDC balance: %s", native)
+        if isinstance(bridged, int):
+            total += bridged
+        else:
+            logger.warning("Failed to fetch bridged USDC.e balance: %s", bridged)
+        return total / 1e6
+
+    async def get_first_funding_tx(self, address: str) -> tuple[str, str] | None:
+        if not settings.etherscan_api_key:
+            return None
+        for contract in (_NATIVE_USDC, _BRIDGED_USDC_E):
+            params = {
+                "chainid": 137, "module": "account", "action": "tokentx",
+                "address": address, "contractaddress": contract,
+                "sort": "asc", "page": 1, "offset": 10,
+                "apikey": settings.etherscan_api_key,
+            }
+            try:
+                resp = await self._http.get(_ETHERSCAN_V2, params=params)
+                resp.raise_for_status()
+                data = resp.json()
+                if data.get("status") != "1":
+                    continue
+                for tx in data.get("result", []):
+                    if tx.get("to", "").lower() == address.lower():
+                        return (tx["hash"], tx["from"])
+            except (httpx.HTTPStatusError, httpx.TransportError) as exc:
+                logger.warning("Etherscan tokentx failed for %s: %s", contract, exc)
+        return None
+
+    async def get_relay_sender(self, tx_hash: str) -> tuple[str, int] | None:
+        try:
+            resp = await self._http.get(
+                f"{_RELAY_API}/requests/v2", params={"hash": tx_hash},
+            )
+            resp.raise_for_status()
+            requests = resp.json().get("requests", [])
+            if not requests:
+                return None
+            req = requests[0]
+            sender = req.get("user", "")
+            in_txs = req.get("inTxs", [])
+            source_chain_id = in_txs[0].get("chainId", 0) if in_txs else 0
+            if sender:
+                return (sender, int(source_chain_id))
+        except (httpx.HTTPStatusError, httpx.TransportError, KeyError, IndexError) as exc:
+            logger.warning("Relay lookup failed for %s: %s", tx_hash, exc)
+        return None

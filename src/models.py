@@ -55,3 +55,7 @@ class WalletAnalysis(BaseModel):
     profile_bio: str = ""
     profile_image: str = ""
     trigger_trade: Trade | None = None
+    usdc_balance: float = 0.0
+    funder_address: str = ""
+    funder_chain: str = ""
+    funding_tx_hash: str = ""

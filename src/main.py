@@ -5,7 +5,7 @@ import logging
 import signal
 import sys
 
-from src.api_client import PolymarketClient
+from src.api_client import ChainClient, PolymarketClient
 from src.analyzer import WalletAnalyzer
 from src.cache import WalletCache
 from src.config import settings
@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 
 async def main() -> None:
     client = PolymarketClient()
-    analyzer = WalletAnalyzer(client)
+    chain_client = ChainClient()
+    analyzer = WalletAnalyzer(client, chain_client)
     notifier = TelegramNotifier()
     cache = WalletCache(ttl_hours=settings.cache_ttl_hours)
     poller = TradePoller(client, analyzer, notifier, cache)
@@ -66,6 +67,7 @@ async def main() -> None:
             except asyncio.CancelledError:
                 pass
         await client.close()
+        await chain_client.close()
         await notifier.close()
         logger.info("Insidor stopped")
 

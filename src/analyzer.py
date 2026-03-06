@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from src.api_client import PolymarketClient
+from src.api_client import CHAIN_NAMES, ChainClient, PolymarketClient
 from src.models import Position, Trade, WalletAnalysis
 from src.signals import is_fresh_wallet
 
@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class WalletAnalyzer:
-    def __init__(self, client: PolymarketClient) -> None:
+    def __init__(self, client: PolymarketClient, chain_client: ChainClient) -> None:
         self._client = client
+        self._chain = chain_client
 
     async def analyze(
         self,
@@ -57,6 +58,37 @@ class WalletAnalyzer:
             logger.info("Skipping %s — wallet older than 30 days", address[:10])
             return None
 
+        usdc_balance = 0.0
+        funder_address = ""
+        funder_chain = ""
+        funding_tx_hash = ""
+
+        enrichment = await asyncio.gather(
+            self._chain.get_usdc_balance(address),
+            self._chain.get_first_funding_tx(address),
+            return_exceptions=True,
+        )
+
+        if isinstance(enrichment[0], float):
+            usdc_balance = enrichment[0]
+        else:
+            logger.warning("USDC balance lookup failed for %s: %s", address[:10], enrichment[0])
+
+        funding_result = enrichment[1]
+        if isinstance(funding_result, tuple):
+            funding_tx_hash, funder_address = funding_result
+            try:
+                relay = await self._chain.get_relay_sender(funding_tx_hash)
+                if relay:
+                    funder_address, chain_id = relay
+                    funder_chain = CHAIN_NAMES.get(chain_id, f"Chain {chain_id}")
+            except Exception:
+                logger.warning("Relay lookup failed for %s", funding_tx_hash[:10])
+        elif not isinstance(funding_result, BaseException):
+            pass
+        else:
+            logger.warning("Funding tx lookup failed for %s: %s", address[:10], funding_result)
+
         return WalletAnalysis(
             address=address,
             positions=positions,
@@ -66,4 +98,8 @@ class WalletAnalyzer:
             profile_bio=bio,
             profile_image=profile_image,
             trigger_trade=trigger_trade,
+            usdc_balance=usdc_balance,
+            funder_address=funder_address,
+            funder_chain=funder_chain,
+            funding_tx_hash=funding_tx_hash,
         )

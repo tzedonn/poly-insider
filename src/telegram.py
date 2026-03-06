@@ -48,6 +48,15 @@ def _format_alert(analysis: WalletAnalysis) -> str:
             f"  https://polymarket.com/event/{t.eventSlug}"
         )
 
+    enrichment_block = f"\n<b>USDC Balance:</b> ${analysis.usdc_balance:,.0f}"
+    if analysis.funder_address:
+        short_funder = f"{analysis.funder_address[:6]}...{analysis.funder_address[-4:]}"
+        via = f" (via Relay, from {analysis.funder_chain})" if analysis.funder_chain else ""
+        enrichment_block += f"\n<b>Funded by:</b> <code>{short_funder}</code>{via}"
+        enrichment_block += f"\n  Arkham: https://intel.arkm.com/explorer/address/{analysis.funder_address}"
+    else:
+        enrichment_block += "\n<b>Funded by:</b> unknown"
+
     position_block = ""
     if analysis.positions:
         top = max(analysis.positions, key=lambda p: p.initialValue)
@@ -72,6 +81,7 @@ def _format_alert(analysis: WalletAnalysis) -> str:
         f"Profile: {profile_line}\n"
         f"Wallet age: {age_line}"
         f"{trigger_block}"
+        f"{enrichment_block}"
         f"{position_block}\n\n"
         f"https://polymarket.com/profile/{addr}"
     )

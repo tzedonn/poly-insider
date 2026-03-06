@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     poll_interval_seconds: int = 30
     min_trade_size_usd: float = 1000
     cache_ttl_hours: int = 24
+    etherscan_api_key: str = ""
 
     @property
     def data_api_base(self) -> str:
@@ -34,4 +35,5 @@ EXCLUDED_SLUG_KEYWORDS = (
     "highest-temperature", "largest-company",
     "elon-musk-of-tweets",
     "fed-decision", "next-three-fed-decisions", "fed-rate-cut",
+    "up-or-down", "la-liga", "donald-trump-of-truth-social-posts-", "val-",
 )
