@@ -38,4 +38,5 @@ EXCLUDED_SLUG_KEYWORDS = (
     "up-or-down", "la-liga", "donald-trump-of-truth-social-posts-", "val-",
     "ipo-closing-market-cap", "bl2-",
     "nvda-week", "bundesliga-", "ballon-dor", "dota2-",
+    "texas-republican", "texas-democratic",
 )
