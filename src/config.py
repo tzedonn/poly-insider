@@ -36,4 +36,5 @@ EXCLUDED_SLUG_KEYWORDS = (
     "elon-musk-of-tweets",
     "fed-decision", "next-three-fed-decisions", "fed-rate-cut",
     "up-or-down", "la-liga", "donald-trump-of-truth-social-posts-", "val-",
+    "ipo-closing-market-cap", "bl2-",
 )
