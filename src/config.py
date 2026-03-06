@@ -39,4 +39,5 @@ EXCLUDED_SLUG_KEYWORDS = (
     "ipo-closing-market-cap", "bl2-",
     "nvda-week", "bundesliga-", "ballon-dor", "dota2-",
     "texas-republican", "texas-democratic",
+    "will-jesus-christ",
 )
