@@ -122,7 +122,7 @@ class ChainClient:
                 resp = await self._http.get(_ETHERSCAN_V2, params=params)
                 resp.raise_for_status()
                 data: dict[str, Any] = resp.json()
-                await asyncio.sleep(0.25)
+                await asyncio.sleep(1.0)
 
             is_rate_limited = (
                 data.get("status") == "0"
