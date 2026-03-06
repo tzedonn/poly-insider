@@ -75,8 +75,12 @@ def _format_alert(analysis: WalletAnalysis) -> str:
                 f"  https://polymarket.com/event/{top.eventSlug}"
             )
 
+    trade_size = analysis.trigger_trade.usdc_value if analysis.trigger_trade else 0
+    is_high_value = trade_size > 10_000 or analysis.usdc_balance > 10_000
+    emoji = "🚨" if is_high_value else "🕵️"
+
     return (
-        f"🕵️ <b>INSIDER ALERT</b>\n\n"
+        f"{emoji} <b>INSIDER ALERT</b>\n\n"
         f"Wallet: <code>{short_addr}</code>\n"
         f"Profile: {profile_line}\n"
         f"Wallet age: {age_line}"
