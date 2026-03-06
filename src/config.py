@@ -40,4 +40,5 @@ EXCLUDED_SLUG_KEYWORDS = (
     "nvda-week", "bundesliga-", "ballon-dor", "dota2-",
     "texas-republican", "texas-democratic",
     "will-jesus-christ", "ere-", "eurovision-winner",
+    "sea-", "richest-person",
 )
