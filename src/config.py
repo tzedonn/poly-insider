@@ -41,4 +41,6 @@ EXCLUDED_SLUG_KEYWORDS = (
     "texas-republican", "texas-democratic",
     "will-jesus-christ", "ere-", "eurovision-winner",
     "sea-", "richest-person",
+    "will-usd-hit", "republican-house-seats", "prime-minister-of-israel",
+    "nepal-house-of", "next-prime-minister", "hungary-parliamentary",
 )

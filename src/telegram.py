@@ -252,29 +252,20 @@ class TelegramNotifier:
                     await self._reply_html(chat_id, _HELP_TEXT)
 
     async def send_heartbeat(self) -> None:
-        now = time.time()
-        elapsed = now - self._last_heartbeat_time
-        self._last_heartbeat_time = now
-        trades = self.trades_streamed
-        streamed = self.wallets_streamed
-        after_ex = self.wallets_after_exclusions
-        above_thr = self.wallets_above_threshold
-        alerts = self.alerts_fired
-        self.trades_streamed = 0
-        self.wallets_streamed = 0
-        self.wallets_after_exclusions = 0
-        self.wallets_above_threshold = 0
-        self.alerts_fired = 0
+        trades = self._count_24h(self._trades_streamed_log)
+        streamed = self._count_24h(self._streamed_log)
+        after_ex = self._count_24h(self._after_exclusions_log)
+        above_thr = self._count_24h(self._above_threshold_log)
+        alerts = self._count_24h(self._alerts_log)
 
-        el_str = self._fmt_elapsed(elapsed)
         text = (
             f"Insidor bot is alive.\n\n"
-            f"Funnel (since last heartbeat, {el_str}):\n"
-            f"Trades streamed: {trades} ({self._per_hr(trades, elapsed)})\n"
-            f"Wallets streamed: {streamed} ({self._per_hr(streamed, elapsed)})\n"
-            f"After exclusions: {after_ex}\n"
-            f"Trades > $1,000: {above_thr}\n"
-            f"Insider alerts: {alerts}\n\n"
+            f"Funnel (last 24h):\n"
+            f"Trades streamed: {trades:,}\n"
+            f"Wallets streamed: {streamed:,}\n"
+            f"After exclusions: {after_ex:,}\n"
+            f"Trades > $1,000: {above_thr:,}\n"
+            f"Insider alerts: {alerts:,}\n\n"
             f"Active filters:\n"
             f"• Min trade size: ${settings.min_trade_size_usd:,.0f}\n"
             f"• Max markets traded: 10\n"

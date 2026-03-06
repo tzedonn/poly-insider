@@ -57,7 +57,7 @@ class TradePoller:
             if any(kw in trade.slug or kw in trade.eventSlug for kw in EXCLUDED_SLUG_KEYWORDS):
                 continue
             after_exclusions.add(trade.proxyWallet)
-            if trade.price >= 0.99:
+            if trade.price >= 0.95:
                 continue
             usdc = trade.usdc_value
             if usdc < settings.min_trade_size_usd:
