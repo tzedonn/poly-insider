@@ -191,6 +191,26 @@ class TelegramNotifier:
         rate = count / (seconds / 3600)
         return f"{rate:,.0f}/hr"
 
+    def _build_funnel_text(self) -> str:
+        trades = self._count_24h(self._trades_streamed_log)
+        streamed = self._count_24h(self._streamed_log)
+        after_ex = self._count_24h(self._after_exclusions_log)
+        above_thr = self._count_24h(self._above_threshold_log)
+        alerts = self._count_24h(self._alerts_log)
+        status = "paused ⏸️" if self.is_paused else "active ✅"
+        elapsed = min(time.time() - self._start_time, _DAY_SECONDS)
+        el_str = self._fmt_elapsed(elapsed)
+        threshold = f"${settings.min_trade_size_usd:,.0f}"
+        return (
+            f"Last 24h funnel ({el_str}):\n"
+            f"Trades streamed: {trades:,} ({self._per_min(trades, elapsed)})\n"
+            f"Wallets streamed: {streamed:,} ({self._per_min(streamed, elapsed)})\n"
+            f"After exclusions: {after_ex:,} ({self._per_min(after_ex, elapsed)})\n"
+            f"Trades > {threshold}: {above_thr:,} ({self._per_hr(above_thr, elapsed)})\n"
+            f"Insider alerts: {alerts:,}\n"
+            f"Status: {status}"
+        )
+
     async def listen_for_commands(self) -> None:
         url = f"{self._bot_base}/getUpdates"
         offset = 0
@@ -230,50 +250,14 @@ class TelegramNotifier:
                     self._paused_until = None
                     await self._reply(chat_id, "Alerts resumed.")
                 elif text == "/check":
-                    trades = self._count_24h(self._trades_streamed_log)
-                    streamed = self._count_24h(self._streamed_log)
-                    after_ex = self._count_24h(self._after_exclusions_log)
-                    above_thr = self._count_24h(self._above_threshold_log)
-                    alerts = self._count_24h(self._alerts_log)
-                    status = "paused" if self.is_paused else "active"
-                    elapsed = min(time.time() - self._start_time, _DAY_SECONDS)
-                    el_str = self._fmt_elapsed(elapsed)
-                    await self._reply(
-                        chat_id,
-                        f"Last 24h funnel ({el_str}):\n"
-                        f"Trades streamed: {trades} ({self._per_min(trades, elapsed)})\n"
-                        f"Wallets streamed: {streamed} ({self._per_min(streamed, elapsed)})\n"
-                        f"After exclusions: {after_ex} ({self._per_min(after_ex, elapsed)})\n"
-                        f"Trades > $1,000: {above_thr} ({self._per_hr(above_thr, elapsed)})\n"
-                        f"Insider alerts: {alerts}\n"
-                        f"Status: {status}",
-                    )
+                    await self._reply(chat_id, self._build_funnel_text())
                 elif text == "/help":
                     await self._reply_html(chat_id, _HELP_TEXT)
 
     async def send_heartbeat(self) -> None:
-        trades = self._count_24h(self._trades_streamed_log)
-        streamed = self._count_24h(self._streamed_log)
-        after_ex = self._count_24h(self._after_exclusions_log)
-        above_thr = self._count_24h(self._above_threshold_log)
-        alerts = self._count_24h(self._alerts_log)
-
-        text = (
-            f"Insidor bot is alive.\n\n"
-            f"Funnel (last 24h):\n"
-            f"Trades streamed: {trades:,}\n"
-            f"Wallets streamed: {streamed:,}\n"
-            f"After exclusions: {after_ex:,}\n"
-            f"Trades > $2,000: {above_thr:,}\n"
-            f"Insider alerts: {alerts:,}\n\n"
-            f"Active filters:\n"
-            f"• Min trade size: ${settings.min_trade_size_usd:,.0f}\n"
-            f"• Max markets traded: 10\n"
-            f"• Max wallet age: 30 days"
-        )
         payload = {
             "chat_id": settings.telegram_chat_id,
-            "text": text,
+            "text": self._build_funnel_text(),
         }
         try:
             resp = await self._client.post(self._url, json=payload)

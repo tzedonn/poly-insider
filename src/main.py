@@ -42,7 +42,7 @@ async def main() -> None:
     async def heartbeat_loop() -> None:
         while True:
             await notifier.send_heartbeat()
-            await asyncio.sleep(3600)
+            await asyncio.sleep(10800)
 
     logger.info("Insidor starting")
 
