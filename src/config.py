@@ -44,5 +44,5 @@ EXCLUDED_SLUG_KEYWORDS = (
     "will-usd-hit", "republican-house-seats", "prime-minister-of-israel",
     "nepal-house-of", "next-prime-minister", "hungary-parliamentary",
     "nba-", "rou1-", "aliens", "fl1-", "spl-", "efa-", "win-the-house",
-    "wta-", "euroleague-", "french-ligue", "baden-",
+    "wta-", "euroleague-", "french-ligue", "baden-", "hk-",
 )
