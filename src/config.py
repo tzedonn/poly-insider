@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     telegram_bot_token: str
     telegram_chat_id: str
     poll_interval_seconds: int = 30
-    min_trade_size_usd: float = 1000
+    min_trade_size_usd: float = 2000
     cache_ttl_hours: int = 24
     etherscan_api_key: str = ""
 
@@ -43,4 +43,6 @@ EXCLUDED_SLUG_KEYWORDS = (
     "sea-", "richest-person",
     "will-usd-hit", "republican-house-seats", "prime-minister-of-israel",
     "nepal-house-of", "next-prime-minister", "hungary-parliamentary",
+    "nba-", "rou1-", "aliens", "fl1-", "spl-", "efa-", "win-the-house",
+    "wta-", "euroleague-", "french-ligue", "baden-",
 )
