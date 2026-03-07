@@ -45,4 +45,5 @@ EXCLUDED_SLUG_KEYWORDS = (
     "nepal-house-of", "next-prime-minister", "hungary-parliamentary",
     "nba-", "rou1-", "aliens", "fl1-", "spl-", "efa-", "win-the-house",
     "wta-", "euroleague-", "french-ligue", "baden-", "hk-", "ucl-", "elc-",
+    "mls-", "bun-",
 )
