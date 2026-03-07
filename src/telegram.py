@@ -264,7 +264,7 @@ class TelegramNotifier:
             f"Trades streamed: {trades:,}\n"
             f"Wallets streamed: {streamed:,}\n"
             f"After exclusions: {after_ex:,}\n"
-            f"Trades > $1,000: {above_thr:,}\n"
+            f"Trades > $2,000: {above_thr:,}\n"
             f"Insider alerts: {alerts:,}\n\n"
             f"Active filters:\n"
             f"• Min trade size: ${settings.min_trade_size_usd:,.0f}\n"
