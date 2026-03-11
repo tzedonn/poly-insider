@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     telegram_bot_token: str
     telegram_chat_id: str
     poll_interval_seconds: int = 30
-    min_trade_size_usd: float = 2000
+    min_trade_size_usd: float = 3000
     cache_ttl_hours: int = 24
     etherscan_api_key: str = ""
 
