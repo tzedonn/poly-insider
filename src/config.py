@@ -46,5 +46,7 @@ EXCLUDED_SLUG_KEYWORDS = (
     "nba-", "rou1-", "aliens", "fl1-", "spl-", "efa-", "win-the-house",
     "wta-", "euroleague-", "french-ligue", "baden-", "hk-", "ucl-", "elc-",
     "mls-", "bun-", "trump-approval-rating", "ecb-interest-rates",
-    "por-", "tur-",
+    "por-", "tur-", "bkligend-", "next-mrbeast-video-on-week", "toulouse-mayor", "wttwom-",
+    "balance-of-power", "georgia-governor-republican-primary-winner",
+    "gc-hit-jun", "sc2-", "hok-",
 )
