@@ -48,5 +48,5 @@ EXCLUDED_SLUG_KEYWORDS = (
     "mls-", "bun-", "trump-approval-rating", "ecb-interest-rates",
     "por-", "tur-", "bkligend-", "next-mrbeast-video-on-week", "toulouse-mayor", "wttwom-",
     "balance-of-power", "georgia-governor-republican-primary-winner",
-    "gc-hit-jun", "sc2-", "hok-",
+    "gc-hit-jun", "sc2-", "hok-", "uel-",
 )
